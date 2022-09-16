@@ -20,9 +20,12 @@ import gsap from 'gsap'
 // import { fragmentShader, vertexShader } from './whiteqiu.glsl.js'
 import { fragmentShader, vertexShader } from './test.glsl.js'
 import { fragmentShader as fragmentShader1, vertexShader as vertexShader1 } from './img3d.glsl.js'
+import { BufferA, fragmentShader as fragmentShader2, vertexShader as vertexShader2 } from './trees.glsl.js'
 // import { fragmentShader, vertexShader } from './sp.glsl.js'
 // import { fragmentShader, vertexShader } from './qiu.glsl.js'
 // import { fragmentShader, vertexShader } from './bianxing.glsl.js'
+
+import { renderCard3D, createCard3D } from './card3d.js'
 window.THREE = THREE
 
 
@@ -58,6 +61,7 @@ controls.minDistance = -10;
 controls.maxDistance = 10;
 controls.panSpeed = 1
 controls.target = new THREE.Vector3(0, 0, 9);
+controls.update();
 scene.add(controls);
 // const axesHelper = new THREE.AxesHelper(5);
 // scene.add(axesHelper);
@@ -105,15 +109,14 @@ cubeMaterial.onBeforeCompile = function (shader) {
   shader.uniforms.iMouse = uniforms.iMouse
   shader.uniforms.iCamera = uniforms.iCamera
   shader.uniforms.iLock = uniforms.iLock
-  // shader.uniforms.iChannel0 = new THREE.TextureLoader().load('https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01a5555e708712a8012165187ca0e4.jpg%403000w_1l_0o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1665144131&t=a4704961e5d1c27e309e99986b2ae03e')
 }
 cubeMesh.position.set(-5, -5, 8.5)
 cubeMesh.name = "音响"
 scene.add(cubeMesh);
 
 //平面
-const card = new THREE.PlaneGeometry(16/3, 11/3);
-const cardMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00,side: THREE.DoubleSide});
+const card = new THREE.PlaneGeometry(16 / 3, 11 / 3);
+const cardMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
 cardMaterial.onBeforeCompile = function (shader) {
   shader.vertexShader = vertexShader1
   shader.fragmentShader = fragmentShader1
@@ -134,107 +137,34 @@ cardMaterial.onBeforeCompile = function (shader) {
 }
 const planeMash = new THREE.Mesh(card, cardMaterial);
 planeMash.position.set(0, 0, 4)
-// scene.add(planeMash);
 
+// const card2 = new THREE.PlaneGeometry(16, 11);
+// const cardMaterial2 = new THREE.MeshBasicMaterial({});
+// cardMaterial2.onBeforeCompile = function (shader) {
+//   shader.vertexShader = vertexShader2
+//   shader.fragmentShader = fragmentShader2
+//   shader.uniforms.iResolution = {
+//     value: new THREE.Vector2(
+//       window.innerWidth, window.innerHeight
+//     )
+//   }
+//   shader.uniforms.iTime = uniforms.iTime
+//   shader.uniforms.iChannel0 = uniforms.iChannel0
+//   shader.uniforms.iFrame = {
+//     value: 60.
+//   }
+// }
+// const planeMash2 = new THREE.Mesh(card2, cardMaterial2);
+// planeMash2.position.set(0, 0, 4)
+// scene.add(planeMash2)
 
-function createText() {
-  var d1 = document.createElement('div');
-  d1.className = 'label';
-  d1.textContent = '相框';
-  d1.style.pointerEvents = 'auto'
-  let xkLabel = new CSS2DObject(d1);
-  xkLabel.name='相框'
-  xkLabel.position.set(0.4, 1.3, 0);
-  scene.add(xkLabel);
-  d1.addEventListener('click', () => {
-    //隐藏文字div
-    scene.add(planeMash);
-    planeMash.children[0].element.style.display = 'block'
-    scene.getObjectByName('相框').element.style.opacity = 0
-    console.log(scene);
-  })
-
-  var d2 = document.createElement('div');
-  d2.className = 'label';
-  d2.textContent = '门';
-  d2.style.pointerEvents = 'auto'
-  var moonLabel = new CSS2DObject(d2);
-  moonLabel.position.set(-8, 1, 10.8);
-  scene.add(moonLabel);
-  d2.addEventListener('click', () => {
-    console.log('1234')
-    alert('门')
-  })
-
-  var d3 = document.createElement('div');
-  d3.className = 'label';
-  d3.textContent = '开关';
-  d3.style.pointerEvents = 'auto'
-  var moonLabel = new CSS2DObject(d3);
-  moonLabel.position.set(0, 1.5, 0);
-  cubeMesh.add(moonLabel);
-  d3.addEventListener('click', () => {
-    uniforms.iLock.value = !uniforms.iLock.value
-    cubeMaterial.needsUpdate = true
-    console.log('音响', uniforms)
-  })
-
-  var d4 = document.createElement('div');
-  d4.className = 'label';
-  d4.textContent = '关闭';
-  d4.style.pointerEvents = 'auto'
-  var moonLabel = new CSS2DObject(d4);
-  moonLabel.position.set(2.2, 1.5, 0);
-  planeMash.add(moonLabel);
-  d4.addEventListener('click', () => {
-    scene.remove(planeMash);
-    console.log(planeMash)
-    scene.getObjectByName('相框').element.style.opacity = 1
-    planeMash.children[0].element.style.display = 'none'
-  })
-  // const container2 = document.createElement('div');
-  // container2.className = 'container3d';
-  // container2.style.pointerEvents = 'none';
-  // const Container = new CSS3DObject(container2); // 使用 CSS3DObject 将 DomElement 转换为 3d 元素
-  // scene.add(Container);
-  // const kuang = new CSS3DObject(kuangRef.value);
-  // Container.add(kuang);
-
-  // Container.style.width = 1448+'px';
-  //       Container.style.height = 750+'px';
-  //       Container.position.z = 10
-
-  // // 卡片
-  // const cardContainer = document.createElement('div');
-  // // cardContainer.style.width = 1448 + 'px';
-  // // cardContainer.style.height = 750 + 'px';
-  // const objectCardContainer = new CSS3DObject(cardContainer);
-  // Container.add(objectCardContainer);
-
-  //竖直背景
-  // const card_bg_vertical = document.createElement('div');
-  // card_bg_vertical.style.width = '30px';
-  // card_bg_vertical.style.height = '60px';
-  // card_bg_vertical.style.position = 'absolute';
-  // card_bg_vertical.style.background = 'url(' + 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01a5555e708712a8012165187ca0e4.jpg%403000w_1l_0o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1665144131&t=a4704961e5d1c27e309e99986b2ae03e' + ') no-repeat';
-  // const objectCardBgVertical = new CSS3DObject(card_bg_vertical);
-  // objectCardBgVertical.position.y = 2;
-  // Container.add(objectCardBgVertical);
-}
-
-
-
-// const material = new THREE.SpriteMaterial({ color: 0xffffff });
-
-// const sprite = new THREE.Sprite(material);
-// sprite.scale.set(2, 2,2)
-// scene.add(sprite);
-
-// material.onBeforeCompile = function (shader) {
-//   shader.vertexShader = vertexShader
-//   //替换片元着色器
-//   // shader.fragmentShader = fragmentShader
-//   //改全局变量
+// var renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+// let scene2 = new THREE.Scene()
+// const card3 = new THREE.PlaneGeometry(16, 11);
+// const cardMaterial3 = new THREE.MeshBasicMaterial({});
+// cardMaterial3.onBeforeCompile = function (shader) {
+//   shader.vertexShader = vertexShader2
+//   shader.fragmentShader = BufferA
 //   shader.uniforms.iResolution = {
 //     value: new THREE.Vector2(
 //       window.innerWidth, window.innerHeight
@@ -243,21 +173,74 @@ function createText() {
 //   shader.uniforms.iTime = uniforms.iTime
 //   shader.uniforms.iMouse = uniforms.iMouse
 //   shader.uniforms.iCamera = uniforms.iCamera
-//   shader.uniforms.iChannel0 = new THREE.TextureLoader().load('https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01a5555e708712a8012165187ca0e4.jpg%403000w_1l_0o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1665144131&t=a4704961e5d1c27e309e99986b2ae03e')
+//   shader.uniforms.iFrame = {
+//     value: 60.
+//   }
 // }
+// const planeMash3 = new THREE.Mesh(card3, cardMaterial3);
+// planeMash3.position.set(0, 0, 4)
+// scene2.add(planeMash3)
+// scene.add(planeMash3)
+const textConfig = [
+  {
+    textContent: '相框',
+    position: new THREE.Vector3(0.4, 1.3, 0),
+    parent: scene,
+    click() {
+      scene.add(planeMash);
+      //隐藏文字div
+      planeMash.children[0].element.style.display = 'block'
+      scene.getObjectByName('相框').element.style.opacity = 0
+      console.log(scene);
+    }
+  },
+  {
+    textContent: '门',
+    position: new THREE.Vector3(-8, 1, 10.8),
+    parent: scene,
+    click() {
+      console.log('1234')
+      alert('门')
+    }
+  },
+  {
+    textContent: '开关',
+    position: new THREE.Vector3(0, 1.5, 0),
+    parent: cubeMesh,
+    click() {
+      uniforms.iLock.value = !uniforms.iLock.value
+      cubeMaterial.needsUpdate = true
+      console.log('音响', uniforms)
+    }
+  },
+  {
+    textContent: '关闭',
+    position: new THREE.Vector3(2.2, 1.5, 0),
+    parent: planeMash,
+    click() {
+      scene.remove(planeMash);
+      console.log(planeMash)
+      scene.getObjectByName('相框').element.style.opacity = 1
+      planeMash.children[0].element.style.display = 'none'
+    }
+  },
+]
+//创建文字标签
+function createText() {
+  for (let config of textConfig) {
+    const { textContent, position, click, parent } = config
+    let div = document.createElement('div');
+    div.className = 'label';
+    div.textContent = textContent;
+    div.style.pointerEvents = 'auto'
+    div.addEventListener('click', click)
+    let css2d = new CSS2DObject(div);
+    css2d.name = textContent
+    css2d.position.copy(position);
+    parent.add(css2d);
+  }
+}
 
-
-
-// const pointsMaterial = new THREE.PointsMaterial({
-//   size: 10,
-//   sizeAttenuation: false,
-//   map: new THREE.TextureLoader().load('https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01a5555e708712a8012165187ca0e4.jpg%403000w_1l_0o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1665144131&t=a4704961e5d1c27e309e99986b2ae03e'),
-//   alphaTest: 0.5
-// });
-// const points = new THREE.Points(mesh.geometry, pointsMaterial);
-// points.morphTargetInfluences = mesh.morphTargetInfluences;
-// points.morphTargetDictionary = mesh.morphTargetDictionary;
-// mesh.add(points);
 
 
 scene.background = material
@@ -268,13 +251,6 @@ console.log('mesh', mesh)
 console.log('camera', camera)
 // console.log('sprite', sprite)
 const click = (event) => {
-  // gsap.to(camera, {
-  //   fov: camera.fov < 25 ? 50 : 10,
-  //   duration: 10,
-  //   onUpdate() {
-  //     camera.updateProjectionMatrix();
-  //   }
-  // })
   const mouseX = event.clientX;//鼠标单击坐标X
   const mouseY = event.clientY;//鼠标单击坐标Y
 
@@ -306,9 +282,6 @@ const clickModel = (e) => {
   // t = t / 5 // 把区间映射为[0,1)
   for (var i = 0; i < intersects.length; i++) {
     if (intersects[i].object.isMesh) {
-      // x: Math.sin(uniforms.iTime.value) * target.position.x,
-      //   y: Math.cos(uniforms.iTime.value) * target.position.y,
-      //   z: Math.cos(uniforms.iTime.value) * target.position.z,
       const target = intersects[i].object
       console.log('mesh', target)
       balls.push(target)
@@ -329,18 +302,6 @@ const clickModel = (e) => {
         target.position.y = Math.cos(start - 0.5 * Math.PI) * r
         start += 0.05
       }, 16)
-      // gsap.to(target.position, {
-      //   x: -target.position.x,
-      //   // y: -target.position.y,
-      //   z: -target.position.z,
-      //   duration: 2,
-      //   repeat: -1,
-      //   yoyo: true,
-      //   ease: 'none',
-      //   onUpdate() {
-      //     camera.updateProjectionMatrix();
-      //   }
-      // })
       break;
     }
   }
@@ -382,23 +343,13 @@ function transToScreenCoord(vector) {
   screenCoord.y = (0.5 - vector.y / 2) * window.innerHeight;
   return screenCoord;
 }
-// function get3DPosByCanvasPos (pos, targetZ=5) {    
-//     let vec = new THREE.Vector3(); // create once and reuse
-//     let target = new THREE.Vector3(); // create once and reuse
-//     vec.set(
-//         ( pos.x / window.innerWidth ) * 2 - 1,
-//         - ( pos.y / window.innerHeight ) * 2 + 1,
-//         0.5 );
-//     vec.unproject( camera );
-//     vec.sub( camera.position ).normalize();
-//     var distance = (targetZ - camera.position.z) / 5;
-//     target.copy( camera.position ).add( vec.multiplyScalar( distance ) );
-//     return target;
-// }
+
+createCard3D({scene})
+
+
 
 const clock = new THREE.Clock()
-let startTime = Date.now()
-function render(time) {
+function render() {
   // sprite.position.set(camera.position.x, 0, camera.position.z - 5)
   uniforms.iTime.value = clock.getElapsedTime()
   uniforms.iCamera.value.x = camera.position.x
@@ -409,18 +360,17 @@ function render(time) {
   w = w / 50. // 把区间映射为[0,1)
   uniforms.iCamera.value.w = camera.position.z * 0.05
 
-  // balls.forEach(v => {
-  //   // let t = uniforms.iTime.value % (2 * Math.PI) // 把秒映射为[0,2p)
-  //   // t = t / (2 * Math.PI) // 把区间映射为[0,2p)  
-  //   v.position.x = (Math.sin(uniforms.iTime.value % (5) - v._position.t)) * 5
-  //   v.position.z = (Math.cos(uniforms.iTime.value % (5) - v._position.t)) * 5
+  // renderer.render(scene2, camera, renderTarget);
+  // uniforms.iChannel0.value = renderTarget.texture
+  let bool = true
+  renderCard3D({ camera, uniforms, scene, renderer, controls, showWorld: bool })
 
-  //   // v.position.z = Math.cos(uniforms.iTime.value) - v._position.z / (2 * Math.PI)
-  // })
-  renderer.render(scene, camera);
+  bool &&renderer.render(scene, camera);
+
   css2DLabelRenderer.render(scene, camera)
   // css3DRenderer.render(scene, camera)
   requestAnimationFrame(render);
+
 
   // var position = mesh.geometry.attributes.position;
   // for (let i = 0; i * 9 < position.array.length; i++) {
